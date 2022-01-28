@@ -1,0 +1,36 @@
+micronaut:
+  server:
+    port: 8070
+
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        step: PT2s
+        descriptions: false
+
+  http:
+    services:
+      read-timeout: 30s
+      broker:
+        path: ngsi-ld/v1
+        url: http://localhost:1027
+        read-timeout: 30
+      test-broker:
+        path: ngsi-ld/v1
+        url: http://localhost:1026
+        read-timeout: 30
+---
+endpoints:
+  metrics:
+    enabled: true
+  health:
+    enabled: true
+
+loggers:
+  levels:
+    ROOT: TRACE
+    io:
+      micronaut:
+        http:
+          client: TRACE

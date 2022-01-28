@@ -1,0 +1,38 @@
+micronaut:
+  application:
+    name: ${project.artifactId}
+
+  server:
+    port: 8080
+
+  metrics:
+    enabled: true
+    export:
+      prometheus:
+        step: PT2s
+        descriptions: false
+
+  http:
+    services:
+      read-timeout: 30s
+      broker:
+        path: ngsi-ld/v1
+        url: http://localhost:1027
+        read-timeout: 30
+jackson:
+  serialization-inclusion: NON_ABSENT
+
+---
+endpoints:
+  metrics:
+    enabled: true
+  health:
+    enabled: true
+
+loggers:
+  levels:
+    ROOT: INFO
+    io:
+      micronaut:
+        http:
+          client: INFO

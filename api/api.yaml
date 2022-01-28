@@ -1,0 +1,323 @@
+openapi: 3.0.3
+info:
+  description: 'Spec for the Notification proxy'
+  version: 0.0.1
+  title: Notification Proxy
+  contact:
+    email: stefan.wiedemann@fiware.org
+tags:
+  - name: Notification
+    description: Endpoints for receiving notification
+
+paths:
+  '/notification':
+    post:
+      tags:
+        - Notification
+      description: Endpoint to receive all notifications
+      operationId: receiveNotification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Notification'
+      responses:
+        '204':
+          description: Notification received.
+components:
+  schemas:
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          format: URI
+        type:
+          type: string
+          enum:
+            - Notification
+        subscriptionId:
+          type: string
+          format: URI
+        notifiedAt:
+          type: string
+          format: date-time
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotifiedEntity'
+    georelEnum:
+      type: string
+      enum:
+        - equals
+        - disjoint
+        - intersects
+        - within
+        - contains
+        - overlaps
+        - ^near;((maxDistance==\d+)|(minDistance==\d+))$
+    georel:
+      type: string
+    geometryEnum:
+      type: string
+    geometryType:
+      type: string
+    positionDefinition:
+      description: A single position
+      type: array
+      minItems: 2
+      maxItems: 2
+      items:
+        type: number
+      additionalProperties: false
+    positionArrayDefinition:
+      description: An array of positions
+      type: array
+      items:
+        $ref: '#/components/schemas/positionDefinition'
+    lineStringDefinition:
+      description: An array of two or more positions
+      type: array
+      items:
+        $ref: '#/components/schemas/positionDefinition'
+      minItems: 2
+    linearRingDefinition:
+      description: An array of four positions where the first equals the last
+      type: array
+      items:
+        $ref: '#/components/schemas/positionDefinition'
+      minItems: 4
+    polygonDefinition:
+      description: An array of linear rings
+      type: array
+      items:
+        $ref: '#/components/schemas/linearRingDefinition'
+    coordinates:
+      oneOf:
+        - $ref: '#/components/schemas/positionDefinition'
+        - $ref: '#/components/schemas/positionArrayDefinition'
+        - $ref: '#/components/schemas/polygonDefinition'
+        - $ref: '#/components/schemas/lineStringDefinition'
+    Point:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Point
+        coordinates:
+          $ref: '#/components/schemas/positionDefinition'
+    MultiPoint:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiPoint
+        coordinates:
+          $ref: '#/components/schemas/positionArrayDefinition'
+    Polygon:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Polygon
+        coordinates:
+          $ref: '#/components/schemas/polygonDefinition'
+    LineString:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - LineString
+        coordinates:
+          $ref: '#/components/schemas/lineStringDefinition'
+    MultiLineString:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiLineString
+        coordinates:
+          type: array
+          items:
+            $ref: '#/components/schemas/lineStringDefinition'
+    MultiPolygon:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - MultiPolygon
+        coordinates:
+          type: array
+          items:
+            $ref: '#/components/schemas/polygonDefinition'
+    Geometry:
+      description: ' Avalid GeoJSON geometry object'
+      oneOf:
+        - $ref: '#/components/schemas/Point'
+        - $ref: '#/components/schemas/MultiPoint'
+        - $ref: '#/components/schemas/Polygon'
+        - $ref: '#/components/schemas/LineString'
+        - $ref: '#/components/schemas/MultiLineString'
+        - $ref: '#/components/schemas/MultiPolygon'
+    observedAt:
+      type: string
+      format: date-time
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+    datasetId:
+      type: string
+      format: uri
+    instanceId:
+      type: string
+      format: uri
+    ProblemDetails:
+      type: object
+      description: Information about the occured error.
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        detail:
+          type: string
+      required:
+        - type
+    GeoProperty:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - GeoProperty
+        value:
+          type: object
+        observedAt:
+          $ref: '#/components/schemas/observedAt'
+        createdAt:
+          $ref: '#/components/schemas/createdAt'
+        modifiedAt:
+          $ref: '#/components/schemas/modifiedAt'
+        datasetId:
+          $ref: '#/components/schemas/datasetId'
+        instanceId:
+          $ref: '#/components/schemas/instanceId'
+        unitCode:
+          type: string
+      required:
+        - type
+        - value
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/Geometry'
+          - $ref: '#/components/schemas/Property'
+          - $ref: '#/components/schemas/Relationship'
+    LdContext:
+      type: object
+    Property:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Property
+        value:
+          oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+            - type: object
+            - type: array
+              items:
+                oneOf:
+                  - type: string
+                  - type: number
+                  - type: boolean
+                  - type: object
+        observedAt:
+          $ref: '#/components/schemas/observedAt'
+        createdAt:
+          $ref: '#/components/schemas/createdAt'
+        modifiedAt:
+          $ref: '#/components/schemas/modifiedAt'
+        datasetId:
+          $ref: '#/components/schemas/datasetId'
+        instanceId:
+          $ref: '#/components/schemas/instanceId'
+        unitCode:
+          type: string
+      required:
+        - type
+        - value
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/Property'
+          - $ref: '#/components/schemas/Relationship'
+    Relationship:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - Relationship
+        object:
+          type: string
+          format: uri
+        observedAt:
+          $ref: '#/components/schemas/observedAt'
+        createdAt:
+          $ref: '#/components/schemas/createdAt'
+        modifiedAt:
+          $ref: '#/components/schemas/modifiedAt'
+        datasetId:
+          $ref: '#/components/schemas/datasetId'
+        instanceId:
+          $ref: '#/components/schemas/instanceId'
+      required:
+        - type
+        - object
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/Property'
+          - $ref: '#/components/schemas/Relationship'
+    Name:
+      type: string
+      pattern: '^((\d|[a-zA-Z]|_)+(:(\d|[a-zA-Z]|_)+)?(#\d+)?)$'
+      minLength: 1
+      description: NGSI-LD Name
+    NotifiedEntity:
+      type: object
+      properties:
+        '@context':
+          $ref: '#/components/schemas/LdContext'
+        location:
+          $ref: '#/components/schemas/GeoProperty'
+        observationSpace:
+          $ref: '#/components/schemas/GeoProperty'
+        operationSpace:
+          $ref: '#/components/schemas/GeoProperty'
+        id:
+          type: string
+          format: uri
+        type:
+          $ref: '#/components/schemas/Name'
+        createdAt:
+          $ref: '#/components/schemas/createdAt'
+        modifiedAt:
+          $ref: '#/components/schemas/modifiedAt'
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/Property'
+          - $ref: '#/components/schemas/Relationship'
+          - $ref: '#/components/schemas/GeoProperty'
