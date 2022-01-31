@@ -527,8 +527,10 @@
                 <configuration>
                     <!-- exclude generated code -->
                     <excludes>
-                        <exclude>org/fiware/ngsi/api/**/*</exclude>
-                        <exclude>org/fiware/ngsi/model/**/*</exclude>
+                        <exclude>org/fiware/ngsi/**/*</exclude>
+                        <exclude>org/fiware/test/**/*</exclude>
+                        <exclude>org/fiware/notificationproxy/api/**/*</exclude>
+                        <exclude>org/fiware/notificationproxy/model/**/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>

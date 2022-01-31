@@ -1,15 +1,19 @@
-name: Release
+name: Pre-Release
 
 on:
-  push:
-    branches:
-      - master
-
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+      - unlabeled
 env:
   REGISTRY: quay.io
   REPOSITORY: wi_stefan
 
 jobs:
+
   generate-version:
     runs-on: ubuntu-latest
 
@@ -19,20 +23,24 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - id: pr
-        uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
+      - id: bump
+        uses: zwaldowski/match-label-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          allowed: major,minor,patch
 
       - uses: zwaldowski/semver-release-action@v2
         with:
           dry_run: true
-          bump: ${{ steps.pr.outputs.labels }}
+          bump: ${{ steps.bump.outputs.match }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get PR Number
+        id: pr_number
+        run: echo "::set-output name=nr::$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')"
 
       - name: Set version output
         id: out
-        run: echo "::set-output name=version::$(echo ${VERSION})"
+        run: echo "::set-output name=version::$(echo ${VERSION}-PRE-${{ steps.pr_number.outputs.nr }})"
 
   # image build&push
   notification-proxy:
@@ -52,13 +60,11 @@ jobs:
 
       - name: Build&Push image
         run: |
-          cd src/endpoint-configuration-service/
           mvn versions:set -DnewVersion=${{ needs.generate-version.outputs.version }}
           mvn clean install deploy -DskipTests -Dimage.tag=${{ needs.generate-version.outputs.version }} -Dimage.registry="${{ env.REGISTRY }}/" -Dimage.repository="${{ env.REPOSITORY }}"
 
   git-release:
-    needs: ["generate-version", "notification-proxy"]
-
+    needs: ["generate-version","notification-proxy"]
     runs-on: ubuntu-latest
 
     steps:
@@ -69,7 +75,7 @@ jobs:
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           automatic_release_tag: ${{ needs.generate-version.outputs.version }}
-          prerelease: false
+          prerelease: true
           title: ${{ needs.generate-version.outputs.version }}
           files: |
             LICENSE
