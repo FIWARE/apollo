@@ -529,6 +529,8 @@
                     <excludes>
                         <exclude>org/fiware/ngsi/**/*</exclude>
                         <exclude>org/fiware/test/**/*</exclude>
+                        <exclude>org/fiware/notificationproxy/api/**/*</exclude>
+                        <exclude>org/fiware/notificationproxy/model/**/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
