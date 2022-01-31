@@ -2,6 +2,7 @@ package org.fiware.notificationproxy.rest;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
+import io.micronaut.http.client.exceptions.EmptyResponseException;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.fiware.notificationproxy.mapping.EntityMapper;
 import org.fiware.test.api.SubscriptionsApiClient;
 import org.fiware.test.api.EntitiesTestApiClient;
 import org.fiware.test.model.EndpointVO;
+import org.fiware.test.model.EntityInfoVO;
 import org.fiware.test.model.EntityVO;
 import org.fiware.test.model.NotificationParamsVO;
 import org.fiware.test.model.PropertyVO;
@@ -22,6 +24,8 @@ import org.testcontainers.shaded.com.fasterxml.jackson.databind.deser.std.UUIDDe
 import java.net.URI;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,7 +40,6 @@ class NotificationControllerTest {
 	private final EntitiesTestApiClient notifierEntitiesClient;
 	private final TestMapper entityMapper;
 	private final GeneralProperties generalProperties;
-	private static final String CONTEXT = "https://raw.githubusercontent.com/smart-data-models/dataModel.DistributedLedgerTech/master/context.jsonld";
 
 	@Test
 	public void test_success() {
@@ -47,13 +50,16 @@ class NotificationControllerTest {
 		NotificationParamsVO notificationParamsVO = new NotificationParamsVO();
 		notificationParamsVO.endpoint(endpointVO);
 
+		EntityInfoVO entityInfoVO = new EntityInfoVO();
+		entityInfoVO.setType("Cattle");
+
 		SubscriptionVO subscriptionVO = new SubscriptionVO();
-		subscriptionVO.atContext(CONTEXT);
+		subscriptionVO.atContext(EntityMapper.DEFAULT_CONTEXT);
 		subscriptionVO.name("mySubscription");
 		subscriptionVO.id(URI.create("urn:ngsi-ld:subscription:test-sub"));
 		subscriptionVO.type(SubscriptionVO.Type.SUBSCRIPTION);
 		subscriptionVO.notification(notificationParamsVO);
-		subscriptionVO.watchedAttributes(Set.of("temp"));
+		subscriptionVO.entities(List.of(entityInfoVO));
 		// workaround for the serializer
 		subscriptionVO.geoQ(null);
 		try {
@@ -67,7 +73,7 @@ class NotificationControllerTest {
 		}
 		EntityVO testCattle = new EntityVO();
 		testCattle.type("Cattle");
-		testCattle.atContext(CONTEXT);
+		testCattle.atContext(EntityMapper.DEFAULT_CONTEXT);
 		testCattle.id(URI.create(cattleName));
 		// workaround for the serializer
 		testCattle.location(null);
@@ -87,7 +93,6 @@ class NotificationControllerTest {
 				fail();
 			}
 		}
-		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
 		Awaitility.await("Wait for entity created in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
 			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
 			return response.getStatus().equals(HttpStatus.OK);
@@ -96,11 +101,12 @@ class NotificationControllerTest {
 		int updatedTemp = 38;
 
 		cattleTemp.value(updatedTemp);
+		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
 		Awaitility.await("Wait for entity to be updated in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
 			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
 
-			if(response.getStatus().equals(HttpStatus.OK)) {
-				if((Integer) response.getBody().get().getAdditionalProperties().get("temp") == updatedTemp){
+			if (response.getStatus().equals(HttpStatus.OK)) {
+				if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(updatedTemp)) {
 					return true;
 				}
 			}
