@@ -99,15 +99,29 @@ class NotificationControllerIntegrationTest {
 			return response.getStatus().equals(HttpStatus.OK);
 		});
 
-		int updatedTemp = 38;
 
-		cattleTemp.value(updatedTemp);
+		cattleTemp.value(38);
 		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
 		Awaitility.await("Wait for entity to be updated in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
 			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
 
 			if (response.getStatus().equals(HttpStatus.OK)) {
-				if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(updatedTemp)) {
+				if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(38)) {
+					return true;
+				}
+			}
+			return false;
+		});
+
+		// type updates are not supported, without we get 204 instead of 207
+		cattleTemp.type(null);
+		cattleTemp.value(39);
+		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
+		Awaitility.await("Wait for entity to be updated in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
+			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
+
+			if (response.getStatus().equals(HttpStatus.OK)) {
+				if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(39)) {
 					return true;
 				}
 			}
