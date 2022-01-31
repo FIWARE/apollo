@@ -2,116 +2,78 @@ package org.fiware.notificationproxy.rest;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
-import io.micronaut.http.client.exceptions.EmptyResponseException;
-import io.micronaut.http.client.exceptions.HttpClientResponseException;
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
-import lombok.RequiredArgsConstructor;
-import org.awaitility.Awaitility;
-import org.fiware.ngsi.api.EntitiesApiClient;
-import org.fiware.notificationproxy.configuration.GeneralProperties;
+import org.fiware.notificationproxy.exception.CreationFailureException;
+import org.fiware.notificationproxy.exception.NoSuchEntityException;
 import org.fiware.notificationproxy.mapping.EntityMapper;
-import org.fiware.test.api.SubscriptionsApiClient;
-import org.fiware.test.api.EntitiesTestApiClient;
-import org.fiware.test.model.EndpointVO;
-import org.fiware.test.model.EntityInfoVO;
-import org.fiware.test.model.EntityVO;
-import org.fiware.test.model.NotificationParamsVO;
-import org.fiware.test.model.PropertyVO;
-import org.fiware.test.model.SubscriptionVO;
+import org.fiware.notificationproxy.mapping.EntityMapperImpl;
+import org.fiware.notificationproxy.model.NotificationVO;
+import org.fiware.notificationproxy.model.NotifiedEntityVO;
+import org.fiware.notificationproxy.model.PropertyVO;
+import org.fiware.notificationproxy.repository.EntityRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.deser.std.UUIDDeserializer;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.net.URI;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-@MicronautTest
-@RequiredArgsConstructor
 class NotificationControllerTest {
 
-	private final EntitiesApiClient subscriberClient;
-	private final SubscriptionsApiClient notifierSubscriptionClient;
-	private final EntitiesTestApiClient notifierEntitiesClient;
-	private final TestMapper entityMapper;
-	private final GeneralProperties generalProperties;
+	private EntityRepository entityRepository;
+	private EntityMapper entityMapper;
+	private NotificationController notificationController;
 
-	@Test
-	public void test_success() {
-		String cattleName = "urn:ngsi-ld:cattle:" + UUID.randomUUID().toString();
-		EndpointVO endpointVO = new EndpointVO();
-		endpointVO.uri(URI.create("http://localhost:8080/notification"));
+	@BeforeEach
+	public void setup() {
+		entityMapper = new EntityMapperImpl();
+		entityRepository = mock(EntityRepository.class);
+		notificationController = new NotificationController(entityMapper, entityRepository);
+	}
 
-		NotificationParamsVO notificationParamsVO = new NotificationParamsVO();
-		notificationParamsVO.endpoint(endpointVO);
+	@ParameterizedTest
+	@MethodSource("notificationStream")
+	public void receiveNotification_badRequest(NotificationVO testNotification) throws Exception{
 
-		EntityInfoVO entityInfoVO = new EntityInfoVO();
-		entityInfoVO.setType("Cattle");
+		doThrow(new NoSuchEntityException("404")).when(entityRepository).updateEntity(any());
+		doThrow(new CreationFailureException("Bad data")).when(entityRepository).createEntity(any());
 
-		SubscriptionVO subscriptionVO = new SubscriptionVO();
-		subscriptionVO.atContext(EntityMapper.DEFAULT_CONTEXT);
-		subscriptionVO.name("mySubscription");
-		subscriptionVO.id(URI.create("urn:ngsi-ld:subscription:test-sub"));
-		subscriptionVO.type(SubscriptionVO.Type.SUBSCRIPTION);
-		subscriptionVO.notification(notificationParamsVO);
-		subscriptionVO.entities(List.of(entityInfoVO));
-		// workaround for the serializer
-		subscriptionVO.geoQ(null);
-		try {
-			notifierSubscriptionClient.createSubscription(subscriptionVO);
-		} catch (HttpClientResponseException e) {
-			if (e.getStatus().equals(HttpStatus.CONFLICT)) {
-				// ignore
-			} else {
-				fail();
-			}
-		}
-		EntityVO testCattle = new EntityVO();
-		testCattle.type("Cattle");
-		testCattle.atContext(EntityMapper.DEFAULT_CONTEXT);
-		testCattle.id(URI.create(cattleName));
-		// workaround for the serializer
-		testCattle.location(null);
-		testCattle.observationSpace(null);
-		testCattle.operationSpace(null);
+		HttpResponse<Object> response = notificationController.receiveNotification(testNotification);
+		assertEquals(HttpStatus.BAD_REQUEST, response.getStatus(), "A bad request should be returend if nothing can be created.");
+	}
 
-		PropertyVO cattleTemp = new PropertyVO();
-		cattleTemp.type(PropertyVO.Type.PROPERTY);
-		cattleTemp.value(37);
-		testCattle.setAdditionalProperties("temp", cattleTemp);
-		try {
-			notifierEntitiesClient.createEntity(testCattle);
-		} catch (HttpClientResponseException e) {
-			if (e.getStatus().equals(HttpStatus.CONFLICT)) {
-				// ignore
-			} else {
-				fail();
-			}
-		}
-		Awaitility.await("Wait for entity created in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
-			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
-			return response.getStatus().equals(HttpStatus.OK);
-		});
-
-		int updatedTemp = 38;
-
-		cattleTemp.value(updatedTemp);
-		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
-		Awaitility.await("Wait for entity to be updated in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
-			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
-
-			if (response.getStatus().equals(HttpStatus.OK)) {
-				if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(updatedTemp)) {
-					return true;
-				}
-			}
-			return false;
-		});
+	private static Stream<Arguments> notificationStream() {
+		return Stream.of(
+				Arguments.of(
+						new NotificationVO()
+								.id(URI.create("urn:ngsi-ld:notification:test"))
+								.type(NotificationVO.Type.NOTIFICATION)
+								.addDataItem(new NotifiedEntityVO().id(URI.create("urn:ngsi-ld:entity:test")))),
+				Arguments.of(
+						new NotificationVO()
+								.id(URI.create("urn:ngsi-ld:notification:test"))
+								.type(NotificationVO.Type.NOTIFICATION)
+								.data(List.of(
+										new NotifiedEntityVO()
+												.id(URI.create("urn:ngsi-ld:entity:test")),
+										new NotifiedEntityVO()
+												.id(URI.create("urn:ngsi-ld:entity2:test"))
+												.setAdditionalProperties(Map.of("temp", new PropertyVO().type(PropertyVO.Type.PROPERTY).value(38)))))
+				),
+				Arguments.of(new NotificationVO()
+						.id(URI.create("urn:ngsi-ld:notification:test"))
+						.type(NotificationVO.Type.NOTIFICATION)
+						.data(List.of()))
+		);
 	}
 
 }
