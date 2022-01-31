@@ -9,7 +9,7 @@ the proxy will try to create the entity via ```POST /entities```.
 ## Deployment
 
 The notification-proxy is provided as a container: https://quay.io/repository/wi_stefan/notification-proxy
-Run it via: ```docker run https://quay.io/repository/wi_stefan/notification-proxy``` It will be available at port ```8080``` per default.
+Run it via: ```docker run quay.io/wi_stefan/notification-proxy``` It will be available at port ```8080``` per default.
 All configurations can be provided with the standard mechanisms of the [Micronaut-Framework](https://micronaut.io/), e.g. [environment variables or appliction.yaml file](https://docs.micronaut.io/3.1.3/guide/index.html#configurationProperties).
 The following table concentrates on the most important configuration parameters:
 
@@ -30,3 +30,82 @@ The setup can look as following:
 ![tenancy](doc/tenancy.svg)
 An API-Gateway handles all incoming traffic and forwards it based on the tenancy information present in the request(f.e. inside an ```Authorization-Header```). 
 
+## Development & Testing
+
+In order to support local development and testing, a [docker-compose](https://docs.docker.com/compose/) is provided at [env/docker-compose.yaml](env/docker-compose.yaml). Run it 
+via ```docker-compose -f env/docker-compose.yaml up```. The setup contains two [Orion-LD Context Brokers](https://github.com/FIWARE/context.Orion-LD), one for sending the notifications to the 
+notification-proxy and one for receiving the changes. The notification-proxy itself is not included and should be started separately. 
+The setup provides following services on localhost:
+* Orion-LD for receiving data: ```localhost:1027``` - this is the one that the proxy should be connected to
+* Orion-LD for sending notifications: ```localhost:1026``` - orion-instance to create the subscription to the proxy
+
+### Example usage:
+* Run compose: ```docker-compose -f env/docker-compose.yaml up```
+* Run notification-proxy: ```docker run --env HTTP_SERVICES_BROKER_URL=http://localhost:1027 -p 8080:8080 quay.io/wi_stefan/notification-proxy```
+* Create a subscription:
+```shell
+    curl --location --request POST 'localhost:1026/ngsi-ld/v1/subscriptions/' \
+        --header 'Content-Type: application/json' \
+        --data-raw ' {
+            "name": "mySubscription",
+            "id": "urn:ngsi-ld:subscription:my-sub",
+            "type": "Subscription",
+            "entities": [
+              {
+                "type": "Cattle"
+              }
+            ],
+            "notification": {
+                "endpoint": {
+                "uri": "http://localhost:8080/notification"
+                }
+            }
+        }'
+  ```
+* Create an entity at the broker:
+```shell
+    curl --location --request POST 'localhost:1026/ngsi-ld/v1/entities' \
+        --header 'Content-Type: application/json' \
+        --data-raw '{
+            "id": "urn:ngsi-ld:cattle:my-cattle",
+            "type": "Cattle",
+            "temp": {
+                "type": "Property",
+                "value": 37
+            }
+        }'
+```
+* Query receiving broker: ```curl --location --request GET 'localhost:1027/ngsi-ld/v1/entities/urn:ngsi-ld:cattle:my-cattle'``` - result:
+```json
+{
+    "@context": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+    "id": "urn:ngsi-ld:cattle:my-cattle",
+    "type": "Cattle",
+    "temp": {
+        "type": "Property",
+        "value": 37
+    }
+}
+```
+* Update a property: 
+```shell
+curl --location --request POST 'localhost:1026/ngsi-ld/v1/entities/urn:ngsi-ld:cattle:my-cattle/attrs' \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "temp": {
+            "type": "Property",
+            "value": 40
+        }
+    }'
+```
+* Query receiving broker: ```curl --location --request GET 'localhost:1027/ngsi-ld/v1/entities/urn:ngsi-ld:cattle:my-cattle'``` - result:
+```json
+{
+    "@context": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+    "id": "urn:ngsi-ld:cattle:my-cattle",
+    "type": "Cattle",
+    "temp": {
+        "type": "Property",
+        "value": 40
+    }
+}
