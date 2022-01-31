@@ -114,7 +114,7 @@ class NotificationControllerIntegrationTest {
 		});
 
 		// type updates are not supported, without we get 204 instead of 207
-		cattleTemp.type(null);
+		testCattle.type(null);
 		cattleTemp.value(39);
 		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
 		Awaitility.await("Wait for entity to be updated in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
