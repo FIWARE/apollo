@@ -51,7 +51,6 @@ public class EntityRepository {
 
 	public void createEntity(EntityVO entityVO) throws CreationFailureException {
 		try {
-
 			entitiesApiClient.createEntity(entityVO, generalProperties.getTenant());
 			return;
 		} catch (HttpClientResponseException e) {

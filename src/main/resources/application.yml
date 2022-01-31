@@ -19,6 +19,7 @@ micronaut:
         path: ngsi-ld/v1
         url: http://localhost:1027
         read-timeout: 30
+
 jackson:
   serialization-inclusion: NON_ABSENT
 
