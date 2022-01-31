@@ -37,12 +37,8 @@ public class EntityRepository {
 					return;
 				}
 				default -> {
-					if (response.getStatus().getCode() >= 200 && response.getStatus().getCode() < 300) {
-						log.info("Received unspecified ok state, will continue.");
-						return;
-					} else {
-						throw new UpdateFailureException(String.format("Was not able to update entity %s. Reason: %s", entityVO.id(), getFailureReason(response)));
-					}
+					log.info("Received unspecified ok state, will continue.");
+					return;
 				}
 			}
 		} catch (HttpClientResponseException e) {
