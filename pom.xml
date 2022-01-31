@@ -529,6 +529,9 @@
                     <excludes>
                         <exclude>org/fiware/ngsi/api/**/*</exclude>
                         <exclude>org/fiware/ngsi/model/**/*</exclude>
+                        <!-- exclude tests -->
+                        <exclude>**/*Test.java</exclude>
+                        <exclude>TestMapper.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
