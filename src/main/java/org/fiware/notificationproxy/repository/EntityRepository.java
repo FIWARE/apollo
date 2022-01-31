@@ -38,11 +38,9 @@ public class EntityRepository {
 				case NOT_FOUND -> throw new NoSuchEntityException(String.format("Entity %s does not exist.", entityVO.id()));
 			}
 		} catch (HttpClientResponseException e) {
-			switch (e.getStatus()) {
-				case NOT_FOUND -> throw new NoSuchEntityException(String.format("Entity %s does not exist.", entityVO.id()));
-				default -> throw new UpdateFailureException(String.format("Was not able to update entity %s. Reason: %s", entityVO.id(), getFailureReason(e.getResponse())));
-			}
+			throw new UpdateFailureException(String.format("Was not able to update entity %s. Reason: %s", entityVO.id(), getFailureReason(e.getResponse())));
 		}
+
 	}
 
 	private Object getFailureReason(HttpResponse response) {
