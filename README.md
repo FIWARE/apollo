@@ -1,4 +1,8 @@
-# Notification-Proxy
+# <a name="top"></a>Notification-Proxy
+[![License badge](https://img.shields.io/badge/license-AGPL_3.0-orange)](https://opensource.org/licenses/AGPL-3.0)
+[![Container Repository on Quay](https://img.shields.io/badge/quay.io-NotificationProxy-green "Container Repository on Quay")](https://quay.io/repository/wi_stefan/notification-proxy?tab=tags)
+[![Coverage Status](https://coveralls.io/repos/github/wistefan/notification-proxy/badge.svg?branch=master)](https://coveralls.io/github/wistefan/notification-proxy?branch=master)
+[![Test](https://github.com/wistefan/notification-proxy/actions/workflows/it.yaml/badge.svg)](https://github.com/wistefan/notification-proxy/actions/workflows/it.yaml)
 
 In order to allow an  [NGSI-LD](https://docbox.etsi.org/isg/cim/open/Latest%20release%20NGSI-LD%20API%20for%20public%20comment.pdf) [broker](https://github.com/FIWARE/catalogue#core-context-broker-components) to receive 
 data sent through subscriptions by another broker, the notification-proxy translates notifications into entity creation or update
