@@ -63,11 +63,6 @@ jobs:
           mvn versions:set -DnewVersion=${{ needs.generate-version.outputs.version }}
           mvn clean install deploy -DskipTests -Dimage.tag=${{ needs.generate-version.outputs.version }} -Dimage.registry="${{ env.REGISTRY }}/" -Dimage.repository="${{ env.REPOSITORY }}"
 
-      - name: Run clair
-        run: |
-          .github/run-clair.sh ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/endpoint-configuration-service:${{ needs.generate-version.outputs.version }}
-
-
   git-release:
     needs: ["generate-version","notification-proxy"]
     runs-on: ubuntu-latest
