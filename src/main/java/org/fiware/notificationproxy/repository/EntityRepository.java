@@ -27,6 +27,7 @@ public class EntityRepository {
 		try {
 			HttpResponse<Object> response = entitiesApiClient.appendEntityAttrs(entityVO.id(), entityMapper.mapToCleanedFragment(entityVO), generalProperties.getTenant(), null);
 			switch (response.getStatus()) {
+				case NOT_FOUND -> throw new NoSuchEntityException(String.format("Entity %s does not exist.", entityVO.id()));
 				case NO_CONTENT -> {
 					return;
 				}
@@ -35,7 +36,14 @@ public class EntityRepository {
 					log.debug("Response was: {}", getFailureReason(response));
 					return;
 				}
-				case NOT_FOUND -> throw new NoSuchEntityException(String.format("Entity %s does not exist.", entityVO.id()));
+				default -> {
+					if (response.getStatus().getCode() >= 200 && response.getStatus().getCode() < 300) {
+						log.info("Received unspecified ok state, will continue.");
+						return;
+					} else {
+						throw new UpdateFailureException(String.format("Was not able to update entity %s. Reason: %s", entityVO.id(), getFailureReason(response)));
+					}
+				}
 			}
 		} catch (HttpClientResponseException e) {
 			throw new UpdateFailureException(String.format("Was not able to update entity %s. Reason: %s", entityVO.id(), getFailureReason(e.getResponse())));
@@ -49,8 +57,13 @@ public class EntityRepository {
 
 	public void createEntity(EntityVO entityVO) throws CreationFailureException {
 		try {
-			entitiesApiClient.createEntity(entityVO, generalProperties.getTenant());
-			return;
+			HttpResponse<Object> response = entitiesApiClient.createEntity(entityVO, generalProperties.getTenant());
+			if (response.getStatus().getCode() >= 200 && response.getStatus().getCode() < 300) {
+				log.info("Received unspecified ok state, will continue.");
+				return;
+			} else {
+				throw new CreationFailureException(String.format("Was not able to create entity %s. Status: %s,  Reason: %s", entityVO.id(), response.getStatus(), getFailureReason(response)));
+			}
 		} catch (HttpClientResponseException e) {
 			switch (e.getStatus()) {
 				case CONFLICT -> throw new CreationFailureException(String.format("Entity %s already exists. Reason: %s", entityVO.id(), getFailureReason(e.getResponse())));
