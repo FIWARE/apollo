@@ -527,11 +527,8 @@
                 <configuration>
                     <!-- exclude generated code -->
                     <excludes>
-                        <exclude>org/fiware/ngsi/api/**/*</exclude>
-                        <exclude>org/fiware/ngsi/model/**/*</exclude>
-                        <!-- exclude tests -->
-                        <exclude>**/*Test.java</exclude>
-                        <exclude>TestMapper.java</exclude>
+                        <exclude>org/fiware/ngsi/**/*</exclude>
+                        <exclude>org/fiware/test/**/*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
