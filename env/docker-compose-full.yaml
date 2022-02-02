@@ -17,7 +17,7 @@ services:
     # sometimes the initial startup fails due to a weird timescale behaviour
     restart: always
     environment:
-      - ORIONLD_MONGO_HOST=localhost
+      - ORIONLD_MONGO_HOST=mongo-db-notifier
       - ORIONLD_LOG_LEVEL=DEBUG
     depends_on:
       - mongo-db-notifier
