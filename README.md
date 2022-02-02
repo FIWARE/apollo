@@ -23,7 +23,7 @@ The following table concentrates on the most important configuration parameters:
 | `micronaut.server.port`     | `MICRONAUT_SERVER_PORT`     | Server port to be used for the notfication proxy. | 8080                                                        |
 | `micronaut.metrics.enabled` | `MICRONAUT_METRICS_ENABLED` | Enable the metrics gathering                      | true                                                        |
 | `general.tenant`            | `GENERAL_TENANT`            | Tenant to be used when forwarding to orion        | null                                                        |
-| `http.services.broker.url`  | `HTTP_SERVICES_BROKER_URL`  | Url of the broker to forward to.                  | http://localhost:1027                                       |
+| `micronaut.http.services.broker.url`  | `MICRONAUT_HTTP_SERVICES_BROKER_URL`  | Url of the broker to forward to.                  | http://localhost:1027                                       |
 
 ## Tenancy
 
