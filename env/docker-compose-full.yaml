@@ -5,7 +5,7 @@ services:
     hostname: notification-proxy
     restart: always
     environment:
-      - HTTP_SERVICES_BROKER_URL=http://orion-subscriber:1026
+      - MICRONAUT_HTTP_SERVICES_BROKER_URL=http://orion-subscriber:1026
     ports:
       - "8080:8080"
     networks:
