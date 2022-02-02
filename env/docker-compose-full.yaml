@@ -1,0 +1,78 @@
+version: "3.5"
+services:
+  notification-proxy:
+    image: ${PROXY_IMAGE:-quay.io/wi_stefan/notification-proxy}
+    hostname: notification-proxy
+    restart: always
+    environment:
+      - HTTP_SERVICES_BROKER_URL=http://orion-subscriber:1026
+    ports:
+      - "8080:8080"
+    networks:
+      - default
+
+  orion-ld-notifier:
+    image: ${ORION_IMAGE:-quay.io/fiware/orion-ld:1.0.1}
+    hostname: orion-notifier
+    # sometimes the initial startup fails due to a weird timescale behaviour
+    restart: always
+    environment:
+      - ORIONLD_MONGO_HOST=localhost
+      - ORIONLD_LOG_LEVEL=DEBUG
+    depends_on:
+      - mongo-db-notifier
+    ports:
+      - "1026:1026"
+    healthcheck:
+      test: curl --fail -s http://orion-notifier:1026/version || exit 1
+      interval: 30s
+      retries: 15
+
+  orion-ld-subscriber:
+    image: ${ORION_IMAGE:-quay.io/fiware/orion-ld:1.0.1}
+    hostname: orion-subscriber
+    # sometimes the initial startup fails due to a weird timescale behaviour
+    restart: always
+    environment:
+      - ORIONLD_MONGO_HOST=mongo-db-subscriber
+      - ORIONLD_LOG_LEVEL=DEBUG
+    depends_on:
+      - mongo-db-subscriber
+    ports:
+      - "1027:1026"
+    networks:
+      - default
+    healthcheck:
+      test: curl --fail -s http://orion-subscriber:1026/version || exit 1
+      interval: 30s
+      retries: 15
+
+  mongo-db-notifier:
+    image: mongo:4.0
+    hostname: mongo-db-notifier
+    expose:
+      - "27017"
+    ports:
+      - "27017:27017"
+    networks:
+      - default
+    command: --nojournal
+    healthcheck:
+      test: |
+        host=`hostname --ip-address || echo '127.0.0.1'`;
+        mongo --quiet $host/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)' && echo 0 || echo 1
+      interval: 30s
+
+  mongo-db-subscriber:
+    image: mongo:4.0
+    hostname: mongo-db-subscriber
+    expose:
+      - "27017"
+    networks:
+      - default
+    command: --nojournal
+    healthcheck:
+      test: |
+        host=`hostname --ip-address || echo '127.0.0.1'`;
+        mongo --quiet $host/test --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)' && echo 0 || echo 1
+      interval: 30s
