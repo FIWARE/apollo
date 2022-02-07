@@ -25,7 +25,7 @@ public class EntityRepository {
 
 	public void updateEntity(EntityVO entityVO) throws NoSuchEntityException, UpdateFailureException {
 		try {
-			HttpResponse<Object> response = entitiesApiClient.appendEntityAttrs(entityVO.id(), entityMapper.mapToCleanedFragment(entityVO), generalProperties.getTenant(), null);
+			HttpResponse<Object> response = entitiesApiClient.appendEntityAttrs(entityVO.id(), entityMapper.fixedEntityVOToEntityFragmentVO(entityVO), generalProperties.getTenant(), null);
 			switch (response.getStatus()) {
 				case NOT_FOUND -> throw new NoSuchEntityException(String.format("Entity %s does not exist.", entityVO.id()));
 				case NO_CONTENT -> {

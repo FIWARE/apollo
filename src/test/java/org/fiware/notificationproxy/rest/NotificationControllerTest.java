@@ -9,7 +9,6 @@ import org.fiware.notificationproxy.mapping.EntityMapper;
 import org.fiware.notificationproxy.mapping.EntityMapperImpl;
 import org.fiware.notificationproxy.model.NotificationVO;
 import org.fiware.notificationproxy.model.NotifiedEntityVO;
-import org.fiware.notificationproxy.model.PropertyVO;
 import org.fiware.notificationproxy.repository.EntityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,12 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class NotificationControllerTest {
 
@@ -75,7 +72,7 @@ class NotificationControllerTest {
 								.id(URI.create("urn:ngsi-ld:entity2:test")),
 						new NotifiedEntityVO()
 								.id(URI.create("urn:ngsi-ld:entity3:test"))
-								.setAdditionalProperties(Map.of("temp", new PropertyVO().type(PropertyVO.Type.PROPERTY).value(38)))));
+								.setAdditionalProperties(Map.of("temp", Map.of("type", "Property", "value", 38) ))));
 
 
 		doThrow(new UpdateFailureException("404")).doNothing().when(entityRepository).updateEntity(any());
@@ -96,7 +93,7 @@ class NotificationControllerTest {
 								.id(URI.create("urn:ngsi-ld:entity2:test")),
 						new NotifiedEntityVO()
 								.id(URI.create("urn:ngsi-ld:entity3:test"))
-								.setAdditionalProperties(Map.of("temp", new PropertyVO().type(PropertyVO.Type.PROPERTY).value(38)))));
+								.setAdditionalProperties(Map.of("temp", Map.of("type", "Property", "value", 38) ))));
 
 
 		doThrow(new NoSuchEntityException("404")).when(entityRepository).updateEntity(any());
@@ -124,7 +121,7 @@ class NotificationControllerTest {
 												.id(URI.create("urn:ngsi-ld:entity2:test")),
 										new NotifiedEntityVO()
 												.id(URI.create("urn:ngsi-ld:entity3:test"))
-												.setAdditionalProperties(Map.of("temp", new PropertyVO().type(PropertyVO.Type.PROPERTY).value(38)))))
+												.setAdditionalProperties(Map.of("temp", Map.of("type", "Property", "value", 38) ))))
 				),
 				Arguments.of(new NotificationVO()
 						.id(URI.create("urn:ngsi-ld:notification:test"))
