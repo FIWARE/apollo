@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -41,7 +42,8 @@ class EntityRepositoryTest {
 	@MethodSource("okState")
 	public void updateEntity_success(HttpStatus status) throws Exception {
 		when(entitiesApiClient.appendEntityAttrs(any(), any(), any(), any())).thenReturn(HttpResponse.status(status));
-		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test")).type("Entity");
+		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test"));
+		entityVO.setAdditionalProperties(Map.of("type", "Entity"));
 
 		assertDoesNotThrow(() -> entityRepository.updateEntity(entityVO), "Nothing should happen.");
 	}
@@ -50,7 +52,8 @@ class EntityRepositoryTest {
 	@MethodSource("failureState")
 	public void updateEntity_failure(HttpStatus status) throws Exception {
 		when(entitiesApiClient.appendEntityAttrs(any(), any(), any(), any())).thenThrow(new HttpClientResponseException("Error", HttpResponse.status(status)));
-		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test")).type("Entity");
+		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test"));
+		entityVO.setAdditionalProperties(Map.of("type", "Entity"));
 		assertThrows(UpdateFailureException.class, () -> entityRepository.updateEntity(entityVO), "An updatefailure should be signaled if something unexpected happens.");
 	}
 
@@ -58,7 +61,8 @@ class EntityRepositoryTest {
 	@MethodSource("okState")
 	public void createEntity_success(HttpStatus status) throws Exception {
 		when(entitiesApiClient.createEntity(any(), any())).thenReturn(HttpResponse.status(status));
-		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test")).type("Entity");
+		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test"));
+		entityVO.setAdditionalProperties(Map.of("type", "Entity"));
 		assertDoesNotThrow(() -> entityRepository.createEntity(entityVO), "Nothing should happen.");
 	}
 
@@ -66,7 +70,8 @@ class EntityRepositoryTest {
 	@MethodSource("failureState")
 	public void createEntity_failure(HttpStatus status) throws Exception {
 		when(entitiesApiClient.createEntity(any(), any())).thenThrow(new HttpClientResponseException("Error", HttpResponse.status(status)));
-		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test")).type("Entity");
+		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test"));
+		entityVO.setAdditionalProperties(Map.of("type", "Entity"));
 		assertThrows(CreationFailureException.class, () -> entityRepository.createEntity(entityVO), "An creation failure should be signaled if something unexpected happens.");
 	}
 

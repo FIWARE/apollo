@@ -14,7 +14,10 @@ import org.fiware.test.api.EntitiesTestApiClient;
 import org.fiware.test.model.EndpointVO;
 import org.fiware.test.model.EntityInfoVO;
 import org.fiware.test.model.EntityVO;
+import org.fiware.test.model.GeoPropertyVO;
 import org.fiware.test.model.NotificationParamsVO;
+import org.fiware.test.model.PointVO;
+import org.fiware.test.model.PositionDefinitionVO;
 import org.fiware.test.model.PropertyVO;
 import org.fiware.test.model.SubscriptionVO;
 import org.junit.jupiter.api.Test;
@@ -77,9 +80,20 @@ class NotificationControllerIntegrationTest {
 		testCattle.atContext(EntityMapper.DEFAULT_CONTEXT);
 		testCattle.id(URI.create(cattleName));
 		// workaround for the serializer
-		testCattle.location(null);
 		testCattle.observationSpace(null);
 		testCattle.operationSpace(null);
+
+		GeoPropertyVO cattleLocation = new GeoPropertyVO();
+		cattleLocation.type(GeoPropertyVO.Type.GEOPROPERTY);
+		PositionDefinitionVO positionDefinitionVO = new PositionDefinitionVO();
+		positionDefinitionVO.add(12.0);
+		positionDefinitionVO.add(13.0);
+		PointVO pointVO = new PointVO();
+		pointVO.type(PointVO.Type.POINT);
+		pointVO.coordinates(positionDefinitionVO);
+		cattleLocation.value(pointVO);
+
+		testCattle.location(cattleLocation);
 
 		PropertyVO cattleTemp = new PropertyVO();
 		cattleTemp.type(PropertyVO.Type.PROPERTY);
