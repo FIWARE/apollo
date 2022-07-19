@@ -1,15 +1,15 @@
-package org.fiware.notificationproxy.rest;
+package org.fiware.apollo.rest;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
-import org.fiware.notificationproxy.exception.CreationFailureException;
-import org.fiware.notificationproxy.exception.NoSuchEntityException;
-import org.fiware.notificationproxy.exception.UpdateFailureException;
-import org.fiware.notificationproxy.mapping.EntityMapper;
-import org.fiware.notificationproxy.mapping.EntityMapperImpl;
-import org.fiware.notificationproxy.model.NotificationVO;
-import org.fiware.notificationproxy.model.NotifiedEntityVO;
-import org.fiware.notificationproxy.repository.EntityRepository;
+import org.fiware.apollo.exception.CreationFailureException;
+import org.fiware.apollo.exception.NoSuchEntityException;
+import org.fiware.apollo.exception.UpdateFailureException;
+import org.fiware.apollo.mapping.EntityMapper;
+import org.fiware.apollo.mapping.EntityMapperImpl;
+import org.fiware.apollo.model.NotificationVO;
+import org.fiware.apollo.model.NotifiedEntityVO;
+import org.fiware.apollo.repository.EntityRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

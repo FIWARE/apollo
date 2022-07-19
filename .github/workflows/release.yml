@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: quay.io
-  REPOSITORY: wi_stefan
+  REPOSITORY: fiware
 
 jobs:
   generate-version:
@@ -35,7 +35,7 @@ jobs:
         run: echo "::set-output name=version::$(echo ${VERSION})"
 
   # image build&push
-  notification-proxy:
+  apollo:
     needs: [ "generate-version" ]
     runs-on: ubuntu-latest
 
@@ -56,7 +56,7 @@ jobs:
           mvn clean install deploy -Pdocker -DskipTests -Dimage.tag=${{ needs.generate-version.outputs.version }} -Dimage.registry="${{ env.REGISTRY }}" -Dimage.repository="${{ env.REPOSITORY }}"
 
   git-release:
-    needs: ["generate-version", "notification-proxy"]
+    needs: ["generate-version", "apollo"]
 
     runs-on: ubuntu-latest
 

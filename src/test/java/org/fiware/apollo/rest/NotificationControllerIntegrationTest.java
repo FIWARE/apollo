@@ -1,4 +1,4 @@
-package org.fiware.notificationproxy.rest;
+package org.fiware.apollo.rest;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -7,8 +7,8 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import lombok.RequiredArgsConstructor;
 import org.awaitility.Awaitility;
 import org.fiware.ngsi.api.EntitiesApiClient;
-import org.fiware.notificationproxy.configuration.GeneralProperties;
-import org.fiware.notificationproxy.mapping.EntityMapper;
+import org.fiware.apollo.configuration.GeneralProperties;
+import org.fiware.apollo.mapping.EntityMapper;
 import org.fiware.test.api.SubscriptionsApiClient;
 import org.fiware.test.api.EntitiesTestApiClient;
 import org.fiware.test.model.EndpointVO;

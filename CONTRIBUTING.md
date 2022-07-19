@@ -1,6 +1,6 @@
-# Contributing to the Notification-Proxy
+# Contributing to FIWARE Apollo
 
-Thanks for checking out the Notification-Proxy. In order to contribute, please check the general [FIWARE development guidelines](https://fiware-requirements.readthedocs.io/en/latest/lifecycle/index.html).
+Thanks for checking out Apollo. In order to contribute, please check the general [FIWARE development guidelines](https://fiware-requirements.readthedocs.io/en/latest/lifecycle/index.html).
 
 ## Coding guidelines
 
@@ -27,7 +27,7 @@ Please report vulnerabilities as [bugs](#bug) or email the authors.
 
 ## Bugs & Enhancements
 
-If you find bug or searching for a new feature, please check the [issues](https://github.com/wistefan/notification-proxy/issues) and [pull requests](https://github.com/wistefan/notification-proxy/pulls)
+If you find bug or searching for a new feature, please check the [issues](https://github.com/FIWARE/apollo/issues) and [pull requests](https://github.com/FIWARE/apollo/pulls)
 first.
 
 ### Bug

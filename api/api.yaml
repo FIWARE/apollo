@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  description: 'Spec for the Notification proxy'
+  description: 'Spec for the FIWARE Apollo'
   version: 0.0.1
-  title: Notification Proxy
+  title: FIWARE Apollo
   contact:
     email: stefan.wiedemann@fiware.org
 tags:
