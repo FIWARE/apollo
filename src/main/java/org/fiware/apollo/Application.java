@@ -1,4 +1,4 @@
-package org.fiware.notificationproxy;
+package org.fiware.apollo;
 
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.runtime.Micronaut;

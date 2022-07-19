@@ -1,8 +1,7 @@
-version: "3.5"
 services:
-  notification-proxy:
-    image: ${PROXY_IMAGE:-quay.io/wi_stefan/notification-proxy}
-    hostname: notification-proxy
+  apollo:
+    image: ${PROXY_IMAGE:-quay.io/fiware/apollo}
+    hostname: apollo
     restart: always
     environment:
       - MICRONAUT_HTTP_SERVICES_BROKER_URL=http://orion-subscriber:1026

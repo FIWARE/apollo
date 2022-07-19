@@ -1,4 +1,4 @@
-package org.fiware.notificationproxy.configuration;
+package org.fiware.apollo.configuration;
 
 import io.micronaut.context.annotation.ConfigurationProperties;
 import lombok.Data;

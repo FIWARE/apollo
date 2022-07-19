@@ -1,4 +1,4 @@
-package org.fiware.notificationproxy.exception;
+package org.fiware.apollo.exception;
 
 public class NoSuchEntityException extends Exception {
 	public NoSuchEntityException(String message) {

@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.fiware</groupId>
-    <artifactId>notification-proxy</artifactId>
+    <artifactId>apollo</artifactId>
     <version>1.0.0</version>
 
     <parent>
@@ -38,21 +38,21 @@
         <!-- project info -->
         <project.author.name>Stefan Wiedemann</project.author.name>
         <project.author.email>stefan.wiedemann@fiware.org</project.author.email>
-        <project.description>TODO</project.description>
-        <project.summary>TODO.</project.summary>
-        <project.url>https://github.com/FIWARE/NotificationProxy</project.url>
+        <project.description>Apollo translates NGSI-LD notifications into entity creation or update operation.</project.description>
+        <project.summary>Receive and translate NGSI-LD notifications.</project.summary>
+        <project.url>https://github.com/FIWARE/apollo</project.url>
         <project.license.name>GNU Affero General Public License v3.0</project.license.name>
         <project.license.identifier>AGPL-3.0-only</project.license.identifier>
         <project.license.url>https://www.gnu.org/licenses/agpl.txt</project.license.url>
-        <project.title>FIWARE NotificationProxy</project.title>
+        <project.title>FIWARE Apollo</project.title>
         <project.vendor>FIWARE Foundation, e.V.</project.vendor>
         <project.contact.domain>fiware.org</project.contact.domain>
         <project.contact.email>stefan.wiedemann@fiware.org</project.contact.email>
 
         <!-- docker -->
-        <exec.mainClass>org.fiware.notificationproxy.Application</exec.mainClass>
+        <exec.mainClass>org.fiware.apollo.Application</exec.mainClass>
         <image.registry>quay.io</image.registry>
-        <image.repository>wi_stefan</image.repository>
+        <image.repository>fiware</image.repository>
         <image.tag>latest</image.tag>
 
         <!-- lazy dev -->
@@ -255,9 +255,9 @@
                         </goals>
                         <configuration>
                             <inputSpec>${project.basedir}/api/api.yaml</inputSpec>
-                            <apiPackage>org.fiware.notificationproxy.api</apiPackage>
+                            <apiPackage>org.fiware.apollo.api</apiPackage>
                             <strictSpec>true</strictSpec>
-                            <modelPackage>org.fiware.notificationproxy.model</modelPackage>
+                            <modelPackage>org.fiware.apollo.model</modelPackage>
                             <generateAliasAsModel>true</generateAliasAsModel>
                             <generatorName>micronaut</generatorName>
                             <modelNameSuffix>VO</modelNameSuffix>
@@ -488,7 +488,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>org.fiware.notificationproxy.Application</mainClass>
+                            <mainClass>org.fiware.apollo.Application</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

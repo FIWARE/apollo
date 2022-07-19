@@ -1,8 +1,8 @@
-package org.fiware.notificationproxy.mapping;
+package org.fiware.apollo.mapping;
 
 import org.fiware.ngsi.model.EntityFragmentVO;
 import org.fiware.ngsi.model.EntityVO;
-import org.fiware.notificationproxy.model.NotifiedEntityVO;
+import org.fiware.apollo.model.NotifiedEntityVO;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "jsr330")

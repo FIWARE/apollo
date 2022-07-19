@@ -1,4 +1,4 @@
-package org.fiware.notificationproxy.repository;
+package org.fiware.apollo.repository;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
@@ -6,11 +6,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.fiware.ngsi.api.EntitiesApiClient;
 import org.fiware.ngsi.model.EntityVO;
-import org.fiware.notificationproxy.configuration.GeneralProperties;
-import org.fiware.notificationproxy.exception.CreationFailureException;
-import org.fiware.notificationproxy.exception.NoSuchEntityException;
-import org.fiware.notificationproxy.exception.UpdateFailureException;
-import org.fiware.notificationproxy.mapping.EntityMapper;
+import org.fiware.apollo.configuration.GeneralProperties;
+import org.fiware.apollo.exception.CreationFailureException;
+import org.fiware.apollo.exception.NoSuchEntityException;
+import org.fiware.apollo.exception.UpdateFailureException;
+import org.fiware.apollo.mapping.EntityMapper;
 
 import javax.inject.Singleton;
 
