@@ -1,4 +1,4 @@
-package org.fiware.notificationproxy.rest;
+package org.fiware.apollo.rest;
 
 import org.fiware.test.model.EntityFragmentVO;
 import org.fiware.test.model.EntityVO;

@@ -1,19 +1,17 @@
-package org.fiware.notificationproxy.repository;
+package org.fiware.apollo.repository;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
 import org.fiware.ngsi.api.EntitiesApiClient;
 import org.fiware.ngsi.model.EntityVO;
-import org.fiware.notificationproxy.configuration.GeneralProperties;
-import org.fiware.notificationproxy.exception.CreationFailureException;
-import org.fiware.notificationproxy.exception.UpdateFailureException;
-import org.fiware.notificationproxy.mapping.EntityMapperImpl;
+import org.fiware.apollo.configuration.GeneralProperties;
+import org.fiware.apollo.exception.CreationFailureException;
+import org.fiware.apollo.exception.UpdateFailureException;
+import org.fiware.apollo.mapping.EntityMapperImpl;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.net.URI;

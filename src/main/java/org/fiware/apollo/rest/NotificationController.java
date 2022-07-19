@@ -1,4 +1,4 @@
-package org.fiware.notificationproxy.rest;
+package org.fiware.apollo.rest;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
@@ -6,17 +6,20 @@ import io.micronaut.http.annotation.Controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.fiware.ngsi.model.EntityVO;
-import org.fiware.notificationproxy.api.NotificationApi;
-import org.fiware.notificationproxy.exception.CreationFailureException;
-import org.fiware.notificationproxy.exception.NoSuchEntityException;
-import org.fiware.notificationproxy.exception.UpdateFailureException;
-import org.fiware.notificationproxy.mapping.EntityMapper;
-import org.fiware.notificationproxy.model.NotificationVO;
-import org.fiware.notificationproxy.repository.EntityRepository;
+import org.fiware.apollo.api.NotificationApi;
+import org.fiware.apollo.exception.CreationFailureException;
+import org.fiware.apollo.exception.NoSuchEntityException;
+import org.fiware.apollo.exception.UpdateFailureException;
+import org.fiware.apollo.mapping.EntityMapper;
+import org.fiware.apollo.model.NotificationVO;
+import org.fiware.apollo.repository.EntityRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of Apollo's NGSI-LD compatible notification api
+ */
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -41,6 +44,9 @@ public class NotificationController implements NotificationApi {
 		}
 	}
 
+	// helper method to handle create or update, depending on the response from the context-broker
+	// - update in case it already exists
+	// - create if no such entity is found
 	private boolean updateEntityInBroker(EntityVO entityVO) {
 		try {
 			entityRepository.updateEntity(entityVO);

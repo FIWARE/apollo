@@ -1,19 +1,19 @@
-# <a name="top"></a>Notification-Proxy
+# <a name="top"></a>FIWARE Apollo
 [![License badge](https://img.shields.io/badge/license-AGPL_3.0-orange)](https://opensource.org/licenses/AGPL-3.0)
-[![Container Repository on Quay](https://img.shields.io/badge/quay.io-NotificationProxy-green "Container Repository on Quay")](https://quay.io/repository/wi_stefan/notification-proxy?tab=tags)
-[![Coverage Status](https://coveralls.io/repos/github/wistefan/notification-proxy/badge.svg?branch=master)](https://coveralls.io/github/wistefan/notification-proxy?branch=master)
-[![Test](https://github.com/wistefan/notification-proxy/actions/workflows/it.yaml/badge.svg)](https://github.com/wistefan/notification-proxy/actions/workflows/it.yaml)
+[![Container Repository on Quay](https://img.shields.io/badge/quay.io-NotificationProxy-green "Container Repository on Quay")](https://quay.io/repository/fiware/apollo?tab=tags)
+[![Coverage Status](https://coveralls.io/repos/github/FIWARE/apollo/badge.svg?branch=master)](https://coveralls.io/github/FIWARE/apollo?branch=master)
+[![Test](https://github.com/FIWARE/apollo/actions/workflows/it.yaml/badge.svg)](https://github.com/FIWARE/apollo/actions/workflows/it.yaml)
 
 In order to allow an  [NGSI-LD](https://docbox.etsi.org/isg/cim/open/Latest%20release%20NGSI-LD%20API%20for%20public%20comment.pdf) [broker](https://github.com/FIWARE/catalogue#core-context-broker-components) to receive 
-data sent through subscriptions by another broker, the notification-proxy translates notifications into entity creation or update
+data sent through subscriptions by another broker, apollo translates notifications into entity creation or update
 requests at the NGSI-LD api. For every entity received in the [data-part of a notification](api/api.yaml#L299), the proxy first tries
 a ```POST /entities/{entityId}/attrs/``` to update(and overwrite the properties) the entity. If ```404 - NOT FOUND``` is returned by the broker,
 the proxy will try to create the entity via ```POST /entities```.
 
 ## Deployment
 
-The notification-proxy is provided as a container: https://quay.io/repository/wi_stefan/notification-proxy
-Run it via: ```docker run quay.io/wi_stefan/notification-proxy``` It will be available at port ```8080``` per default.
+Apollo is provided as a container: https://quay.io/repository/fiware/apollo
+Run it via: ```docker run quay.io/fiware/apollo``` It will be available at port ```8080``` per default.
 All configurations can be provided with the standard mechanisms of the [Micronaut-Framework](https://micronaut.io/), e.g. [environment variables or appliction.yaml file](https://docs.micronaut.io/3.1.3/guide/index.html#configurationProperties).
 The following table concentrates on the most important configuration parameters:
 
@@ -38,14 +38,14 @@ An API-Gateway handles all incoming traffic and forwards it based on the tenancy
 
 In order to support local development and testing, a [docker-compose](https://docs.docker.com/compose/) is provided at [env/docker-compose.yaml](env/docker-compose.yaml). Run it 
 via ```docker-compose -f env/docker-compose.yaml up```. The setup contains two [Orion-LD Context Brokers](https://github.com/FIWARE/context.Orion-LD), one for sending the notifications to the 
-notification-proxy and one for receiving the changes. The notification-proxy itself is not included and should be started separately. 
+apollo and one for receiving the changes. Apollo itself is not included and should be started separately. 
 The setup provides following services on localhost:
 * Orion-LD for receiving data: ```localhost:1027``` - this is the one that the proxy should be connected to
 * Orion-LD for sending notifications: ```localhost:1026``` - orion-instance to create the subscription to the proxy
 
 ### Example usage:
 * Run compose: ```docker-compose -f env/docker-compose.yaml up```
-* Run notification-proxy: ```docker run --env HTTP_SERVICES_BROKER_URL=http://localhost:1027 -p 8080:8080 quay.io/wi_stefan/notification-proxy```
+* Run apollo: ```docker run --env HTTP_SERVICES_BROKER_URL=http://localhost:1027 -p 8080:8080 quay.io/fiware/apollo```
 * Create a subscription:
 ```shell
     curl --location --request POST 'localhost:1026/ngsi-ld/v1/subscriptions/' \

@@ -1,4 +1,4 @@
-package org.fiware.notificationproxy.configuration;
+package org.fiware.apollo.configuration;
 
 import io.micronaut.context.annotation.ConfigurationProperties;
 import lombok.Data;
@@ -9,6 +9,8 @@ import lombok.Data;
 @ConfigurationProperties("general")
 @Data
 public class GeneralProperties {
-
+	/**
+	 * Which tenant should Apollo serve?
+	 */
 	private String tenant = null;
 }
