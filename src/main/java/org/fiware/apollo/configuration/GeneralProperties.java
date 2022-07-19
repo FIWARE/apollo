@@ -9,6 +9,8 @@ import lombok.Data;
 @ConfigurationProperties("general")
 @Data
 public class GeneralProperties {
-
+	/**
+	 * Which tenant should Apollo serve?
+	 */
 	private String tenant = null;
 }

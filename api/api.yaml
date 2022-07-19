@@ -27,6 +27,7 @@ paths:
           description: Notification received.
 components:
   schemas:
+    LdContext:
       type: object
     Notification:
       type: object

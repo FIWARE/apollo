@@ -17,6 +17,9 @@ import org.fiware.apollo.repository.EntityRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of Apollo's NGSI-LD compatible notification api
+ */
 @Slf4j
 @Controller
 @RequiredArgsConstructor
@@ -41,6 +44,9 @@ public class NotificationController implements NotificationApi {
 		}
 	}
 
+	// helper method to handle create or update, depending on the response from the context-broker
+	// - update in case it already exists
+	// - create if no such entity is found
 	private boolean updateEntityInBroker(EntityVO entityVO) {
 		try {
 			entityRepository.updateEntity(entityVO);
