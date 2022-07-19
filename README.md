@@ -1,14 +1,21 @@
 # <a name="top"></a>FIWARE Apollo
-[![License badge](https://img.shields.io/badge/license-AGPL_3.0-orange)](https://opensource.org/licenses/AGPL-3.0)
+[![](https://nexus.lab.fiware.org/repository/raw/public/badges/chapters/core.svg)](https://www.fiware.org/developers/catalogue/)
+[![License badge](https://img.shields.io/github/license/FIWARE/apollo.svg)](https://opensource.org/licenses/AGPL-3.0)
 [![Container Repository on Quay](https://img.shields.io/badge/quay.io-NotificationProxy-green "Container Repository on Quay")](https://quay.io/repository/fiware/apollo?tab=tags)
+[![](https://img.shields.io/badge/tag-fiware-orange.svg?logo=stackoverflow)](http://stackoverflow.com/questions/tagged/fiware)
+<br>
 [![Coverage Status](https://coveralls.io/repos/github/FIWARE/apollo/badge.svg?branch=master)](https://coveralls.io/github/FIWARE/apollo?branch=master)
 [![Test](https://github.com/FIWARE/apollo/actions/workflows/it.yaml/badge.svg)](https://github.com/FIWARE/apollo/actions/workflows/it.yaml)
+![Status](https://nexus.lab.fiware.org/static/badges/statuses/incubating.svg)
 
 In order to allow an  [NGSI-LD](https://docbox.etsi.org/isg/cim/open/Latest%20release%20NGSI-LD%20API%20for%20public%20comment.pdf) [broker](https://github.com/FIWARE/catalogue#core-context-broker-components) to receive 
 data sent through subscriptions by another broker, apollo translates notifications into entity creation or update
 requests at the NGSI-LD api. For every entity received in the [data-part of a notification](api/api.yaml#L299), the proxy first tries
 a ```POST /entities/{entityId}/attrs/``` to update(and overwrite the properties) the entity. If ```404 - NOT FOUND``` is returned by the broker,
 the proxy will try to create the entity via ```POST /entities```.
+
+This project is part of [FIWARE](https://www.fiware.org/). For more information check the FIWARE Catalogue entry for the
+[Core Context](https://github.com/Fiware/catalogue/tree/master/core).
 
 ## Deployment
 
