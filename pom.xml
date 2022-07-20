@@ -56,7 +56,7 @@
         <image.tag>latest</image.tag>
 
         <!-- lazy dev -->
-        <version.org.mapstruct>1.4.2.Final</version.org.mapstruct>
+        <version.org.mapstruct>1.5.2.Final</version.org.mapstruct>
         <version.org.projectlombok>1.18.22</version.org.projectlombok>
 
         <!-- logging -->
