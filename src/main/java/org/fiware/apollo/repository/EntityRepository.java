@@ -52,7 +52,9 @@ public class EntityRepository {
 				}
 			}
 		} catch (HttpClientResponseException e) {
-			log.warn("Error:" , e);
+			if (e.getStatus().equals(HttpResponse.notFound())) {
+				throw new NoSuchEntityException(String.format("Entity %s does not exist.", entityVO.id()));
+			}
 			throw new UpdateFailureException(String.format("Was not able to update entity %s. Reason: %s", entityVO.id(), getFailureReason(e.getResponse())));
 		}
 
