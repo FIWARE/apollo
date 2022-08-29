@@ -29,11 +29,3 @@ endpoints:
     enabled: true
   health:
     enabled: true
-
-loggers:
-  levels:
-    ROOT: INFO
-    io:
-      micronaut:
-        http:
-          client: INFO
