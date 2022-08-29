@@ -52,6 +52,7 @@ public class EntityRepository {
 				}
 			}
 		} catch (HttpClientResponseException e) {
+			log.warn("Error:" , e);
 			throw new UpdateFailureException(String.format("Was not able to update entity %s. Reason: %s", entityVO.id(), getFailureReason(e.getResponse())));
 		}
 
