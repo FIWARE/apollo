@@ -52,6 +52,7 @@ public class EntityRepository {
 				}
 			}
 		} catch (HttpClientResponseException e) {
+			log.error("Received exception.", e);
 			if (e.getStatus().equals(HttpResponse.notFound())) {
 				throw new NoSuchEntityException(String.format("Entity %s does not exist.", entityVO.id()));
 			}

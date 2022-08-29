@@ -30,7 +30,6 @@ public class NotificationController implements NotificationApi {
 
 	@Override
 	public HttpResponse<Object> receiveNotification(NotificationVO notificationVO) {
-		log.warn("Received notification.");
 		List<Boolean> resultList = notificationVO.getData().stream().map(entityMapper::fixedNotifiedEntityVOToEntityVO).map(this::updateEntityInBroker).collect(Collectors.toList());
 		if (resultList.contains(true) && !resultList.contains(false)) {
 			// everything succeeded
