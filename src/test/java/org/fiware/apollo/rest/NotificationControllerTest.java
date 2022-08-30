@@ -2,6 +2,7 @@ package org.fiware.apollo.rest;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
+import io.reactivex.Single;
 import org.fiware.apollo.exception.CreationFailureException;
 import org.fiware.apollo.exception.NoSuchEntityException;
 import org.fiware.apollo.exception.UpdateFailureException;
@@ -23,8 +24,10 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class NotificationControllerTest {
 
@@ -43,10 +46,10 @@ class NotificationControllerTest {
 	@MethodSource("notificationStream")
 	public void receiveNotification_badRequest_create(NotificationVO testNotification) throws Exception {
 
-		doThrow(new NoSuchEntityException("404")).when(entityRepository).updateEntity(any());
-		doThrow(new CreationFailureException("Bad data")).when(entityRepository).createEntity(any());
+		when(entityRepository.updateEntity(any())).thenReturn(Single.just(UpdateResult.NOT_FOUND));
+		when(entityRepository.createEntity(any())).thenReturn(Single.just(false));
 
-		HttpResponse<Object> response = notificationController.receiveNotification(testNotification);
+		HttpResponse<Object> response = notificationController.receiveNotification(testNotification).blockingGet();
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatus(), "A bad request should be returned if nothing can be created.");
 	}
 
@@ -54,9 +57,9 @@ class NotificationControllerTest {
 	@MethodSource("notificationStream")
 	public void receiveNotification_badRequest_update(NotificationVO testNotification) throws Exception {
 
-		doThrow(new UpdateFailureException("boom.")).when(entityRepository).updateEntity(any());
+		when(entityRepository.updateEntity(any())).thenReturn(Single.just(UpdateResult.ERROR));
 
-		HttpResponse<Object> response = notificationController.receiveNotification(testNotification);
+		HttpResponse<Object> response = notificationController.receiveNotification(testNotification).blockingGet();
 		assertEquals(HttpStatus.BAD_REQUEST, response.getStatus(), "A bad request should be returned if nothing can be created.");
 	}
 
@@ -72,12 +75,12 @@ class NotificationControllerTest {
 								.id(URI.create("urn:ngsi-ld:entity2:test")),
 						new NotifiedEntityVO()
 								.id(URI.create("urn:ngsi-ld:entity3:test"))
-								.setAdditionalProperties(Map.of("temp", Map.of("type", "Property", "value", 38) ))));
+								.setAdditionalProperties(Map.of("temp", Map.of("type", "Property", "value", 38)))));
 
 
-		doThrow(new UpdateFailureException("404")).doNothing().when(entityRepository).updateEntity(any());
+		doReturn(Single.just(UpdateResult.ERROR)).doReturn(Single.just(UpdateResult.UPDATED)).when(entityRepository).updateEntity(any());
 
-		HttpResponse<Object> response = notificationController.receiveNotification(testNotification);
+		HttpResponse<Object> response = notificationController.receiveNotification(testNotification).blockingGet();
 		assertEquals(HttpStatus.MULTI_STATUS, response.getStatus(), "Multi-Status should be returned if only some can be updated.");
 	}
 
@@ -93,13 +96,12 @@ class NotificationControllerTest {
 								.id(URI.create("urn:ngsi-ld:entity2:test")),
 						new NotifiedEntityVO()
 								.id(URI.create("urn:ngsi-ld:entity3:test"))
-								.setAdditionalProperties(Map.of("temp", Map.of("type", "Property", "value", 38) ))));
+								.setAdditionalProperties(Map.of("temp", Map.of("type", "Property", "value", 38)))));
 
+		when(entityRepository.updateEntity(any())).thenReturn(Single.just(UpdateResult.NOT_FOUND));
+		doReturn(Single.just(false)).doReturn(Single.just(true)).when(entityRepository).createEntity(any());
 
-		doThrow(new NoSuchEntityException("404")).when(entityRepository).updateEntity(any());
-		doThrow(new CreationFailureException("Bad")).doNothing().when(entityRepository).createEntity(any());
-
-		HttpResponse<Object> response = notificationController.receiveNotification(testNotification);
+		HttpResponse<Object> response = notificationController.receiveNotification(testNotification).blockingGet();
 		assertEquals(HttpStatus.MULTI_STATUS, response.getStatus(), "Multi-Status should be returned if only some can be created.");
 	}
 
@@ -121,7 +123,7 @@ class NotificationControllerTest {
 												.id(URI.create("urn:ngsi-ld:entity2:test")),
 										new NotifiedEntityVO()
 												.id(URI.create("urn:ngsi-ld:entity3:test"))
-												.setAdditionalProperties(Map.of("temp", Map.of("type", "Property", "value", 38) ))))
+												.setAdditionalProperties(Map.of("temp", Map.of("type", "Property", "value", 38)))))
 				),
 				Arguments.of(new NotificationVO()
 						.id(URI.create("urn:ngsi-ld:notification:test"))
