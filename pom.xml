@@ -271,6 +271,7 @@
                                 <introspected>true</introspected>
                                 <useBeanValidation>false</useBeanValidation>
                                 <jacksonDatabindNullable>false</jacksonDatabindNullable>
+                                <supportAsync>true</supportAsync>
                                 <supportsAdditionalPropertiesWithComposedSchema>true</supportsAdditionalPropertiesWithComposedSchema>
                             </configOptions>
                             <typeMappings>
@@ -303,6 +304,7 @@
                                 <introspected>true</introspected>
                                 <useBeanValidation>false</useBeanValidation>
                                 <jacksonDatabindNullable>false</jacksonDatabindNullable>
+                                <supportAsync>true</supportAsync>
                                 <supportsAdditionalPropertiesWithComposedSchema>true</supportsAdditionalPropertiesWithComposedSchema>
                             </configOptions>
                             <typeMappings>

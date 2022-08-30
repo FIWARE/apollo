@@ -109,7 +109,7 @@ class NotificationControllerIntegrationTest {
 			}
 		}
 		Awaitility.await("Wait for entity created in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
-			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
+			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null).blockingGet();
 			return response.getStatus().equals(HttpStatus.OK);
 		});
 
@@ -117,7 +117,7 @@ class NotificationControllerIntegrationTest {
 		cattleTemp.value(38);
 		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
 		Awaitility.await("Wait for entity to be updated in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
-			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
+			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null).blockingGet();
 
 			if (response.getStatus().equals(HttpStatus.OK)) {
 				if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(38)) {
@@ -132,7 +132,7 @@ class NotificationControllerIntegrationTest {
 		cattleTemp.value(39);
 		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
 		Awaitility.await("Wait for entity to be updated in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
-			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
+			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null).blockingGet();
 
 			if (response.getStatus().equals(HttpStatus.OK)) {
 				if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(39)) {
