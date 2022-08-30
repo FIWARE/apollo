@@ -56,6 +56,16 @@ public class EntityRepository {
 								return UpdateResult.UPDATED;
 							}
 						}
+					})
+					.onErrorReturn(e -> {
+						if (e instanceof HttpClientResponseException clientException) {
+							if (clientException.getStatus().equals(HttpStatus.NOT_FOUND)) {
+								log.info("Entity {} does not exist.", entityVO.id());
+								return UpdateResult.NOT_FOUND;
+							}
+						}
+						log.warn("Was not able to update entity {}.", entityVO.id(), e);
+						return UpdateResult.ERROR;
 					});
 		} catch (HttpClientResponseException clientException) {
 			if (clientException.getStatus().equals(HttpStatus.NOT_FOUND)) {

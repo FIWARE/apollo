@@ -63,8 +63,8 @@ public class NotificationController implements NotificationApi {
 		return entityRepository.updateEntity(entityVO)
 				.flatMap(result -> switch (result) {
 					case NOT_FOUND -> entityRepository.createEntity(entityVO);
-					case ERROR -> Single.just(false);
 					case UPDATED -> Single.just(true);
+					default -> Single.just(false);
 				});
 	}
 }
