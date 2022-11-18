@@ -1,15 +1,16 @@
 package org.fiware.apollo.repository;
 
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import io.reactivex.Single;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.fiware.apollo.rest.UpdateResult;
 import org.fiware.ngsi.api.EntitiesApiClient;
 import org.fiware.ngsi.model.EntityVO;
 import org.fiware.apollo.configuration.GeneralProperties;
 import org.fiware.apollo.exception.CreationFailureException;
-import org.fiware.apollo.exception.NoSuchEntityException;
-import org.fiware.apollo.exception.UpdateFailureException;
 import org.fiware.apollo.mapping.EntityMapper;
 
 import javax.inject.Singleton;
@@ -30,53 +31,80 @@ public class EntityRepository {
 	 * Update the entity at the context broker
 	 *
 	 * @param entityVO entity to update
-	 * @throws NoSuchEntityException  - thrown if the requested entity does not exist
-	 * @throws UpdateFailureException - thrown if the entity exists, but could not be updated
+	 * @return a single, containing the result of the update
 	 */
-	public void updateEntity(EntityVO entityVO) throws NoSuchEntityException, UpdateFailureException {
+	public Single<UpdateResult> updateEntity(EntityVO entityVO) {
+
 		try {
-			HttpResponse<Object> response = entitiesApiClient.appendEntityAttrs(entityVO.id(), entityMapper.fixedEntityVOToEntityFragmentVO(entityVO), generalProperties.getTenant(), null);
-			switch (response.getStatus()) {
-				case NOT_FOUND -> throw new NoSuchEntityException(String.format("Entity %s does not exist.", entityVO.id()));
-				case NO_CONTENT -> {
-					return;
-				}
-				case MULTI_STATUS -> {
-					log.info("Not all values where appended.");
-					log.debug("Response was: {}", getFailureReason(response));
-					return;
-				}
-				default -> {
-					log.info("Received unspecified ok state, will continue.");
-					return;
-				}
+			return entitiesApiClient.appendEntityAttrs(entityVO.id(), entityMapper.fixedEntityVOToEntityFragmentVO(entityVO), generalProperties.getTenant(), null)
+					.map(response -> {
+						switch (response.getStatus()) {
+							case NOT_FOUND -> {
+								log.info("Entity {} does not exist.", entityVO.id());
+								return UpdateResult.NOT_FOUND;
+							}
+							case NO_CONTENT -> {
+								return UpdateResult.UPDATED;
+							}
+							case MULTI_STATUS -> {
+								log.info("Not all values where appended.");
+								log.debug("Response was: {}", getFailureReason(response));
+								return UpdateResult.UPDATED;
+							}
+							default -> {
+								log.info("Received unspecified ok state, will continue.");
+								return UpdateResult.UPDATED;
+							}
+						}
+					})
+					.onErrorReturn(e -> {
+						if (e instanceof HttpClientResponseException clientException) {
+							if (clientException.getStatus().equals(HttpStatus.NOT_FOUND)) {
+								log.info("Entity {} does not exist.", entityVO.id());
+								return UpdateResult.NOT_FOUND;
+							}
+						}
+						log.warn("Was not able to update entity {}.", entityVO.id(), e);
+						return UpdateResult.ERROR;
+					});
+		} catch (HttpClientResponseException clientException) {
+			if (clientException.getStatus().equals(HttpStatus.NOT_FOUND)) {
+				log.info("Entity {} does not exist.", entityVO.id());
+				return Single.just(UpdateResult.NOT_FOUND);
 			}
-		} catch (HttpClientResponseException e) {
-			throw new UpdateFailureException(String.format("Was not able to update entity %s. Reason: %s", entityVO.id(), getFailureReason(e.getResponse())));
+			log.warn("Was not able to update entity {}. Reason: {}", entityVO.id(), getFailureReason(clientException.getResponse()));
+			return Single.just(UpdateResult.ERROR);
 		}
 
 	}
+
 
 	/**
 	 * Create the entity on the context broker
 	 *
 	 * @param entityVO entity to be created
-	 * @throws CreationFailureException - thrown in case the entity could not have been created.
+	 * @return A single emitting the creation result
 	 */
-	public void createEntity(EntityVO entityVO) throws CreationFailureException {
+	public Single<Boolean> createEntity(EntityVO entityVO) throws CreationFailureException {
 		try {
-			HttpResponse<Object> response = entitiesApiClient.createEntity(entityVO, generalProperties.getTenant());
-			if (response.getStatus().getCode() >= 200 && response.getStatus().getCode() < 300) {
-				log.info("Received unspecified ok state, will continue.");
-				return;
+			return entitiesApiClient
+					.createEntity(entityVO, generalProperties.getTenant())
+					.map(response -> {
+						if (response.getStatus().getCode() >= 200 && response.getStatus().getCode() < 300) {
+							log.info("Received unspecified ok state, will continue.");
+							return true;
+						} else {
+							log.warn("Was not able to create entity {}. Status: {},  Reason: {}", entityVO.id(), response.getStatus(), getFailureReason(response));
+							return false;
+						}
+					});
+		} catch (HttpClientResponseException clientException) {
+			if (clientException.getStatus().equals(HttpStatus.CONFLICT)) {
+				log.warn("Entity {} already exists. Reason: {}", entityVO.id(), getFailureReason(clientException.getResponse()));
 			} else {
-				throw new CreationFailureException(String.format("Was not able to create entity %s. Status: %s,  Reason: %s", entityVO.id(), response.getStatus(), getFailureReason(response)));
+				log.warn("Was not able to create entity {}. Status: {},  Reason: {}", entityVO.id(), clientException.getStatus(), getFailureReason(clientException.getResponse()));
 			}
-		} catch (HttpClientResponseException e) {
-			switch (e.getStatus()) {
-				case CONFLICT -> throw new CreationFailureException(String.format("Entity %s already exists. Reason: %s", entityVO.id(), getFailureReason(e.getResponse())));
-				default -> throw new CreationFailureException(String.format("Was not able to create entity %s. Status: %s,  Reason: %s", entityVO.id(), e.getStatus(), getFailureReason(e.getResponse())));
-			}
+			return Single.just(false);
 		}
 	}
 

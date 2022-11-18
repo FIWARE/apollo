@@ -108,22 +108,32 @@ class NotificationControllerIntegrationTest {
 				fail();
 			}
 		}
-		Awaitility.await("Wait for entity created in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
-			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
-			return response.getStatus().equals(HttpStatus.OK);
+		Awaitility.await("Wait for entity created in the subscriber.").atMost(Duration.of(100, ChronoUnit.SECONDS)).until(() -> {
+			try {
+				HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null).blockingGet();
+				return response.getStatus().equals(HttpStatus.OK);
+			} catch (HttpClientResponseException e) {
+				return false;
+			}
 		});
 
 
 		cattleTemp.value(38);
 		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
 		Awaitility.await("Wait for entity to be updated in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
-			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
+			try {
 
-			if (response.getStatus().equals(HttpStatus.OK)) {
-				if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(38)) {
-					return true;
+				HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null).blockingGet();
+
+				if (response.getStatus().equals(HttpStatus.OK)) {
+					if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(38)) {
+						return true;
+					}
 				}
+			} catch (HttpClientResponseException e) {
+				return false;
 			}
+
 			return false;
 		});
 
@@ -132,7 +142,7 @@ class NotificationControllerIntegrationTest {
 		cattleTemp.value(39);
 		notifierEntitiesClient.appendEntityAttrs(testCattle.id(), entityMapper.entityVOToFragment(testCattle), null);
 		Awaitility.await("Wait for entity to be updated in the subscriber.").atMost(Duration.of(10, ChronoUnit.SECONDS)).until(() -> {
-			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null);
+			HttpResponse<org.fiware.ngsi.model.EntityVO> response = subscriberClient.retrieveEntityById(testCattle.getId(), generalProperties.getTenant(), null, null, null, null).blockingGet();
 
 			if (response.getStatus().equals(HttpStatus.OK)) {
 				if (((Map) response.getBody().get().getAdditionalProperties().get("temp")).get("value").equals(39)) {
