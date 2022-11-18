@@ -3,6 +3,8 @@ package org.fiware.apollo.repository;
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.HttpStatus;
 import io.micronaut.http.client.exceptions.HttpClientResponseException;
+import io.reactivex.Single;
+import org.fiware.apollo.rest.UpdateResult;
 import org.fiware.ngsi.api.EntitiesApiClient;
 import org.fiware.ngsi.model.EntityVO;
 import org.fiware.apollo.configuration.GeneralProperties;
@@ -20,6 +22,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -39,7 +43,7 @@ class EntityRepositoryTest {
 	@ParameterizedTest
 	@MethodSource("okState")
 	public void updateEntity_success(HttpStatus status) throws Exception {
-		when(entitiesApiClient.appendEntityAttrs(any(), any(), any(), any())).thenReturn(HttpResponse.status(status));
+		when(entitiesApiClient.appendEntityAttrs(any(), any(), any(), any())).thenReturn(Single.just(HttpResponse.status(status)));
 		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test"));
 		entityVO.setAdditionalProperties(Map.of("type", "Entity"));
 
@@ -52,13 +56,18 @@ class EntityRepositoryTest {
 		when(entitiesApiClient.appendEntityAttrs(any(), any(), any(), any())).thenThrow(new HttpClientResponseException("Error", HttpResponse.status(status)));
 		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test"));
 		entityVO.setAdditionalProperties(Map.of("type", "Entity"));
-		assertThrows(UpdateFailureException.class, () -> entityRepository.updateEntity(entityVO), "An updatefailure should be signaled if something unexpected happens.");
+		UpdateResult updateResult = entityRepository.updateEntity(entityVO).blockingGet();
+		if (status.equals(HttpStatus.NOT_FOUND)) {
+			assertEquals(UpdateResult.NOT_FOUND, updateResult, "Not found should be signaled if the entity is not found.");
+		} else {
+			assertEquals(UpdateResult.ERROR, updateResult, "An update failure should be signaled if something unexpected happens.");
+		}
 	}
 
 	@ParameterizedTest
 	@MethodSource("okState")
 	public void createEntity_success(HttpStatus status) throws Exception {
-		when(entitiesApiClient.createEntity(any(), any())).thenReturn(HttpResponse.status(status));
+		when(entitiesApiClient.createEntity(any(), any())).thenReturn(Single.just(HttpResponse.status(status)));
 		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test"));
 		entityVO.setAdditionalProperties(Map.of("type", "Entity"));
 		assertDoesNotThrow(() -> entityRepository.createEntity(entityVO), "Nothing should happen.");
@@ -70,7 +79,7 @@ class EntityRepositoryTest {
 		when(entitiesApiClient.createEntity(any(), any())).thenThrow(new HttpClientResponseException("Error", HttpResponse.status(status)));
 		EntityVO entityVO = new EntityVO().id(URI.create("urn:ngis-ld:entity:test"));
 		entityVO.setAdditionalProperties(Map.of("type", "Entity"));
-		assertThrows(CreationFailureException.class, () -> entityRepository.createEntity(entityVO), "An creation failure should be signaled if something unexpected happens.");
+		assertFalse(entityRepository.createEntity(entityVO).blockingGet(), "An creation failure should be signaled if something unexpected happens.");
 	}
 
 	public static Stream<Arguments> okState() {
