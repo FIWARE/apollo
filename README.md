@@ -52,7 +52,7 @@ The setup provides following services on localhost:
 
 ### Example usage:
 * Run compose: ```docker-compose -f env/docker-compose.yaml up```
-* Run apollo: ```docker run --env HTTP_SERVICES_BROKER_URL=http://localhost:1027 -p 8080:8080 quay.io/fiware/apollo```
+* Run apollo: ```docker run --network host --env HTTP_SERVICES_BROKER_URL=http://localhost:1027 -p 8080:8080 quay.io/fiware/apollo```
 * Create a subscription:
 ```shell
     curl --location --request POST 'localhost:1026/ngsi-ld/v1/subscriptions/' \
