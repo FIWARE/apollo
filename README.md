@@ -1,7 +1,7 @@
 # <a name="top"></a>FIWARE Apollo
 [![](https://nexus.lab.fiware.org/repository/raw/public/badges/chapters/core.svg)](https://www.fiware.org/developers/catalogue/)
 [![License badge](https://img.shields.io/github/license/FIWARE/apollo.svg)](https://opensource.org/licenses/AGPL-3.0)
-[![Container Repository on Quay](https://img.shields.io/badge/quay.io-NotificationProxy-green "Container Repository on Quay")](https://quay.io/repository/fiware/apollo?tab=tags)
+[![Docker badge](https://img.shields.io/badge/quay.io-fiware%2Fapollo-grey?logo=red%20hat&labelColor=EE0000)](https://quay.io/repository/fiware/apollo)
 [![](https://img.shields.io/badge/tag-fiware-orange.svg?logo=stackoverflow)](http://stackoverflow.com/questions/tagged/fiware)
 <br>
 [![Coverage Status](https://coveralls.io/repos/github/FIWARE/apollo/badge.svg?branch=master)](https://coveralls.io/github/FIWARE/apollo?branch=master)
